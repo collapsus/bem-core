@@ -380,9 +380,9 @@ JS-реализация блока описывает поведение опр�
 3. Статические методы — `{Object}`.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('i-bem__dom', function(provide, BEMDOM) {
 
-DOM.decl(/* имя или описание блока */,
+BEMDOM.decl(/* имя или описание блока */,
     {
         /* методы экземпляра */
     },
@@ -391,7 +391,7 @@ DOM.decl(/* имя или описание блока */,
     }
 );
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -473,7 +473,7 @@ provide({
 **Пример**: декларация методов для блока `button`.
 
 ```js
-DOM.decl('button',
+BEMDOM.decl('button',
     { /* методы экземпляра */ },
     { /* статические методы */ }
 );
@@ -488,7 +488,7 @@ DOM.decl('button',
 `type` в значении `link` (описывает поведение псевдокнопок):
 
 ```js
-DOM.decl({ block: 'button', modName: 'type', modVal: 'link' },
+BEMDOM.decl({ block: 'button', modName: 'type', modVal: 'link' },
     { /* методы экземпляра */ },
     { /* статические методы */ }
 );
@@ -540,20 +540,20 @@ provide(BEMDOM.decl({ block : this.name, baseBlock : ABlock ));
 <a name="inher-over"></a>
 #### Доопределение существующего блока
 
-При наследовании от блоков, предоставляющих сложную логику, удобнее сохранять основную функциональность базового блока. Для этого можно **доопределить** базовый блок новым на уровне переопределения проекта. Новый блок реализует собственную логику, дополняющую или переопределяющую логику базового. Такая схема наследования часто используется при работе с библиотечными блоками.
+При наследовании можно сохранить основную функциональность базового блока. Для этого можно **доопределить** базовый блок новым на уровне переопределения проекта. Создаваемый в проекте блок реализует собственную логику, дополняющую или переопределяющую логику базового. Такая схема наследования часто используется при работе с библиотечными блоками.
 
 Чтобы доопределить существующий блок нужно создать новый блок с тем же именем. Пересекающиеся методы и модификаторы будут определены в соответствие с декларацией нового блока.
 
 ```js
 modules.define('ablock', ['i-bem__dom'], function(provide, BEMDOM) {
 
-provide(BEMDOM.decl(this.name, {}));
+provide(BEMDOM.decl(this.name, {})); // Объявляем базовый блок
 
 });
 
 modules.define('ablock', function(provide, ABlock) {
 
-provide(ABlock.decl({}));
+provide(ABlock.decl({})); // Доопределяем базовый блок
 
 });
 ```
@@ -562,7 +562,7 @@ provide(ABlock.decl({}));
 <a name="inher-over-modifier"></a>
 ##### Добавление модификатора к существующему блоку
 
-В соответствие с БЭМ-методологией состояния блока должны описываться [модификаторами](#modifiers). По этому расширение функциональности блока, часто, предполагает реализацию поддержки новых модификаторов.
+В соответствие с БЭМ-методологией состояния блока должны описываться [модификаторами](#modifiers). Поэтому расширение функциональности блока, часто, предполагает реализацию поддержки новых модификаторов.
 
 Для добавления модификатора нужно передать методу `decl` доопределяемого блока:
 
@@ -572,13 +572,13 @@ provide(ABlock.decl({}));
 ```js
 modules.define('ablock', ['i-bem__dom'], function(provide, BEMDOM) {
 
-provide(BEMDOM.decl(this.name, {}));
+provide(BEMDOM.decl(this.name, {})); // Объявляем базовый блок
 
 });
 
 modules.define('ablock', function(provide, ABlock) {
 
-provide(ABlock.decl({ modName : 'm1', modVal : 'v1' }, {}));
+provide(ABlock.decl({ modName : 'm1', modVal : 'v1' }, {})); // Доопределяем базовый блок с модификтором _m1_v1
 
 });
 ```
@@ -587,7 +587,7 @@ provide(ABlock.decl({ modName : 'm1', modVal : 'v1' }, {}));
 <a name="inher-mixins"></a>
 #### Блоки-миксы
 
-В *i-bem.js* для добавления востребованной функциональности к блокам, используется специальный тип блоков – **блоки-миксы**. Главная особенность блоков-миксов состоит в том, что они не участвуют в цепочке наследования. Это позволяет примешивать, реализованную в них функциональность к блокам, без риска нарушения их связей с родительскими блоками (вызов базовых методов (`this.__base`) и т.д.).
+В *i-bem.js* для добавления востребованной функциональности к блокам, используется специальный тип блоков – **блоки-миксы**. Главная особенность блоков-миксов состоит в том, что они не участвуют в цепочке наследования. Это позволяет примешивать реализованную в них функциональность к блокам без риска нарушения их связей с родительскими блоками (вызов базовых методов (`this.__base`) и т.д.).
 
 <a name="inher-mixins-declwithmix"></a>
 ##### Описание блока-микса в декларации
@@ -595,7 +595,7 @@ provide(ABlock.decl({ modName : 'm1', modVal : 'v1' }, {}));
 Чтобы подмешать к блоку один или несколько блоков-миксов, нужно в декларации блока присвоить значение опциональному полю `baseMix`.  Значением служит массив имен, примешиваемых блоков-миксов:
 
 ```js
-DOM.decl({ block: 'myblock', baseMix: ['foo', 'bar']},
+BEM.decl({ block: 'myblock', baseMix: ['foo', 'bar']},
     { /* методы экземпляра */ },
     { /* статические методы */ }
 );
@@ -608,7 +608,7 @@ DOM.decl({ block: 'myblock', baseMix: ['foo', 'bar']},
 В качестве блоков-миксов можно использовать только блоки, созданные с помощью `declMix`. Этот метод принимает декларацию блока в формате, аналогичном методу `decl`:
 
 ```js
-BEM.declMix('mymix',
+BEMDOM.declMix('mymix',
     { /* свойства и методы экземпляра */ },
     { /* статические свойства и методы */ }
 );
@@ -645,7 +645,7 @@ BEM.declMix('mymix',
     `onEvent` экземпляра блока `my-block`.
 
 ```js
-DOM.decl('my-block', {
+BEMDOM.decl('my-block', {
     onEvent: function() {
         this.__self.staticMethod(); // вызов статического метода
         this.doMore();
@@ -663,7 +663,7 @@ DOM.decl('my-block', {
     **Пример**: вызов (и модификация) метода `_onClick` родительского класса (базовой реализации метода в классе `button`).
 
 ```js
-DOM.decl({ block: 'my-button', baseBlock: 'button' }, {
+BEMDOM.decl({ block: 'my-button', baseBlock: 'button' }, {
     _onClick: function() {
         this.__base();
         this.doMore();
@@ -712,7 +712,7 @@ DOM.decl({ block: 'my-button', baseBlock: 'button' }, {
   полученный таким образом, не требуется сохранять в переменную.
 
 ```js
-DOM.decl('link', {
+BEMDOM.decl('link', {
     setInnerText: function() {
         this.elem('inner').text('Текст ссылки');
         /* ... */
@@ -724,7 +724,7 @@ DOM.decl('link', {
 * Некеширующий доступ: `findElem(elems, [modName], [modVal])`.
 
 ```js
-DOM.decl('link', {
+BEMDOM.decl('link', {
     setInnerText: function() {
         var inner = this.findElem('inner');
         inner.text('Текст ссылки');
@@ -741,10 +741,10 @@ DOM.decl('link', {
 сбросить:
 
 ```js
-DOM.decl('attach', {
+BEMDOM.decl('attach', {
     clear: function() {
-        DOM.destruct(this.elem('control'));
-        DOM.destruct(this.elem('file'));
+        BEMDOM.destruct(this.elem('control'));
+        BEMDOM.destruct(this.elem('file'));
         return this.dropElemCache('control file');
     }
 });
@@ -795,13 +795,13 @@ HTML-элементы по BEMJSON-описанию в соответствии 
 modules.define(
     'i-bem__dom',
     ['BEMHTML', 'strings__escape'],
-    function(provide, BEMHTML, escape, DOM) {
+    function(provide, BEMHTML, escape, BEMDOM) {
 
-DOM.decl('attach', {
+BEMDOM.decl('attach', {
     _updateFileElem : function() {
         var fileName = extractFileNameFromPath(this.getVal());
-        this.elem('file').length && DOM.destruct(this.elem('file'));
-        DOM.append(
+        this.elem('file').length && BEMDOM.destruct(this.elem('file'));
+        BEMDOM.append(
             this.domElem,
             BEMHTML.apply({
                 block : 'attach',
@@ -819,7 +819,7 @@ DOM.decl('attach', {
     }
 });
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -915,7 +915,7 @@ handler)`.
 значение `big`.
 
 ```js
-DOM.decl('my-block', {
+BEMDOM.decl('my-block', {
     onSetMod : {
         'js' : {
             'inited': function() {
@@ -935,7 +935,7 @@ DOM.decl('my-block', {
   которого будет вызван метод экземпляра блока `_onSubmit`.
 
 ```js
-DOM.decl('my-block', {
+BEMDOM.decl('my-block', {
     onSetMod : {
         'js' : {
             'inited': function() {
@@ -980,7 +980,7 @@ DOM.decl('my-block', {
   существовал ли этот пункт в момент инициализации экземпляра блока.
 
 ```js
-DOM.decl('menu', {
+BEMDOM.decl('menu', {
     _onItemClick : function(e) {
         var clickedItem = $(e.currentTarget); // элемент 'item' блока 'menu', на котором слушается DOM-событие 'click'
     }
@@ -1047,7 +1047,7 @@ DOM-элементах, а на **экземплярах блоков**. Эле�
   `disabled`:
 
 ```js
-DOM.decl('submit', {
+BEMDOM.decl('submit', {
     onSetMod: {
         'js': {
             'inited': function() {
@@ -1074,7 +1074,7 @@ BEM-событие `click` этой кнопки. В результате при
 (экземпляр блока `my-form`).
 
 ```js
-DOM.decl('my-form', {
+BEMDOM.decl('my-form', {
     onSetMod: {
         'js': {
             'inited': function() {
@@ -1126,7 +1126,7 @@ BEM.decl('monitor', {
     onSetMod: {
         'js': {
             'inited': function() {
-            block1.on({ modName : 'm1', modVal : '*' }, function() {})
+              block1.on({ modName : 'm1', modVal : '*' }, function() {});
             }
         }
     },
@@ -1135,21 +1135,19 @@ BEM.decl('monitor', {
 
 * установку модификатора `m1` в значение `v1`.
 ```js
-block1.on({ modName : 'm1', modVal : 'v1' }, function() {}) // change _m1 to _v1
+block1.on({ modName : 'm1', modVal : 'v1' }, function() {});
 ```
 
 * удаление модификатора `m1`. 
 ```js
-block1.on({ modName : 'm1', modVal : '' }, function() {}) // delete _m1
+block1.on({ modName : 'm1', modVal : '' }, function() {});
 ```
 
 * удаление модификатора `m1` у элемента `e1`.
 ```js
-block1.on({ elem : 'e1', modName : 'm1', modVal : '' }, function() {}) // delete _m1 on __e1
+block1.on({ elem : 'e1', modName : 'm1', modVal : '' }, function() {});
 ```
 
-
-BEM-события при изменении модификатора реализованы в виде простых строчных событий вида `_m1_v1`.
 
 -------------------------------------------------------------------------------
 
@@ -1191,11 +1189,11 @@ BEM-события (контейнер). Если не указан, в каче
   (`this`). При [уничтожении экземпляров блока](#destruct) `menu`
 
 ```js
-DOM.decl('menu', {
+BEMDOM.decl('menu', {
     onSetMod : {
         'js' : {
             'inited' : function() {
-                DOM.blocks['link'].on( // подписка на BEM-событие
+                BEMDOM.blocks['link'].on( // подписка на BEM-событие
                     this.domElem, // контейнер — DOM-узел экземпляра блока menu
                     'click', // BEM-событие
                     this._onLinkClick, // обработчик
@@ -1203,7 +1201,7 @@ DOM.decl('menu', {
             },
 
             '' : function() {
-                DOM.blocks['link'].un( // удаление подписки на BEM-событие
+                BEMDOM.blocks['link'].un( // удаление подписки на BEM-событие
                     this.domElem,
                     'click',
                     this._onLinkClick,
@@ -1334,7 +1332,7 @@ DOM.decl('menu', {
 `color`, если не выставлен модификатор `disabled`:
 
 ```js
-DOM.decl('square', {
+BEMDOM.decl('square', {
     onSquareClick: function(e) {
         if(!this.hasMod('disabled')) {
             this.toggleMod('color', 'green', 'red');
@@ -1352,7 +1350,7 @@ DOM.decl('square', {
 `true`):
 
 ```js
-DOM.decl('searchbox', {
+BEMDOM.decl('searchbox', {
     _onClick: function() {
         this.setMod(this.elem('input'), 'clean');
     }
@@ -1422,9 +1420,9 @@ DOM.decl('searchbox', {
   **модификаторов элементов** блока.
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('i-bem__dom', function(provide, BEMDOM) {
 
-DOM.decl(/* селектор блока */,
+BEMDOM.decl(/* селектор блока */,
     {
         /* методы экземпляра */
         beforeSetMod: { /* триггеры до установки модификаторов блока*/}
@@ -1437,7 +1435,7 @@ DOM.decl(/* селектор блока */,
     }
 );
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -1516,7 +1514,7 @@ DOM-узлом блока, необходимые для перехода в н�
   заменяет пустой строкой текст DOM-узла блока.
 
 ```js
-DOM.decl('input', {
+BEMDOM.decl('input', {
     onSetMod : {
         'focused' : {
             'true' : function() {
@@ -1537,7 +1535,7 @@ DOM.decl('input', {
   установки модификатора `focused` не произойдет.
 
 ```js
-DOM.decl('input', {
+BEMDOM.decl('input', {
     beforeSetMod : {
         'focused' : {
             'true' : function() {
@@ -1726,9 +1724,9 @@ JS-объекты для всех DOM-узлов, в атрибуте `class` к
   см. раздел [Взаимодействие блоков](#ibc).
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('i-bem__dom', function(provide, BEMDOM) {
 
-DOM.decl('my-block',
+BEMDOM.decl('my-block',
     {
         onSetMod: {
             'js': {
@@ -1740,7 +1738,7 @@ DOM.decl('my-block',
     { live: 'true' } // статические методы и свойства
 );
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -1764,9 +1762,9 @@ DOM- или BEM-событий, в теле функции следует вып
   `click` будет вызываться метод экземпляра блока `_onClick`:
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('i-bem__dom', function(provide, BEMDOM) {
 
-DOM.decl('my-block',
+BEMDOM.decl('my-block',
     {
         onSetMod: {
             'js': {
@@ -1785,7 +1783,7 @@ DOM.decl('my-block',
     }
 );
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -1797,9 +1795,9 @@ provide(DOM);
 
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('i-bem__dom', function(provide, BEMDOM) {
 
-DOM.decl('my-block',
+BEMDOM.decl('my-block',
     {
         onSetMod: {
             'js': {
@@ -1818,7 +1816,7 @@ DOM.decl('my-block',
     }
 );
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -1870,9 +1868,9 @@ provide(DOM);
   `router` при вызове метода `onRequest`:
 
 ```js
-modules.define('i-bem__dom', 'i-bem', function(provide, BEM, DOM) {
+modules.define('i-bem__dom', 'i-bem', function(provide, BEM, BEMDOM) {
 
-DOM.decl('container', {
+BEMDOM.decl('container', {
     onSetMod: {
         'js': {
             'inited': function() {
@@ -1886,7 +1884,7 @@ DOM.decl('container', {
     }
 });
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -1897,15 +1895,15 @@ provide(DOM);
   экземпляр блока):
 
 ```js
-modules.define('i-bem__dom', 'router', function(provide, DOM, router) {
+modules.define('i-bem__dom', 'router', function(provide, BEMDOM, router) {
 
-DOM.decl('container', {
+BEMDOM.decl('container', {
     onRequest: function() {
         router.route(/* ... */); // вызов метода блока router
     }
 });
 
-provide(DOM, router);
+provide(BEMDOM, router);
 
 });
 ```
@@ -1920,9 +1918,9 @@ JS-объекты и удаляются в момент удаления все�
 процессе работы экземпляр блока без DOM-представления `router`.
 
 ```js
-modules.define('i-bem__dom', 'i-bem', function(provide, BEM, DOM) {
+modules.define('i-bem__dom', 'i-bem', function(provide, BEM, BEMDOM) {
 
-DOM.decl('container', {
+BEMDOM.decl('container', {
     onSetMod : {
         'js' : {
             '' : function() {
@@ -1932,7 +1930,7 @@ DOM.decl('container', {
     }
 });
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -1991,9 +1989,9 @@ DOM-узла текущего блока:
   модификатор `disabled` в то же значение, которое получил сам:
 
 ```js
-modules.define('i-bem__dom', function(provide, DOM) {
+modules.define('i-bem__dom', function(provide, BEMDOM) {
 
-DOM.decl('attach', {
+BEMDOM.decl('attach', {
     onSetMod: {
         'disabled': function(modName, modVal) {
             this.findBlockInside('button').setMod(modName, modVal);
@@ -2001,7 +1999,7 @@ DOM.decl('attach', {
     }
 });
 
-provide(DOM);
+provide(BEMDOM);
 
 });
 ```
@@ -2052,7 +2050,7 @@ BEM.blocks['name']
   все попапы на странице:
 
 ```js
-DOM.decl('switcher', {
+BEMDOM.decl('switcher', {
     onSetMod : {
         'popup' : {
             'disabled' : function() {
